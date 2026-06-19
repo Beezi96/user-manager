@@ -1,0 +1,17 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+require __DIR__ . '/../vendor/autoload.php';
+
+use App\Domain\User;
+
+$user = new User(
+        id: 1,
+        firstName: 'Alex',
+        lastName: 'Petrov',
+        email: 'alex.petrov@example.com',
+);
+
+echo $user->getEmail() . PHP_EOL;
