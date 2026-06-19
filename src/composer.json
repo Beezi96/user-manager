@@ -1,0 +1,12 @@
+{
+  "name": "pet/user-manager",
+  "type": "project",
+  "autoload": {
+    "psr-4": {
+      "App\\": "app/"
+    }
+  },
+  "require": {
+    "php": "^8.1"
+  }
+}
