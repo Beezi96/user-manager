@@ -6,12 +6,63 @@ declare(strict_types=1);
 require __DIR__ . '/../vendor/autoload.php';
 
 use App\Domain\User;
+use App\Repository\JsonUserRepository;
+use App\Service\UserService;
 
-$user = new User(
-        id: 1,
-        firstName: 'Alex',
-        lastName: 'Petrov',
-        email: 'alex.petrov@example.com',
-);
+$repository = new JsonUserRepository(__DIR__ . '/../storage/users.json');
+$service = new UserService($repository);
 
-echo $user->getEmail() . PHP_EOL;
+$command = $argv[1] ?? null;
+
+if ($command === null) {
+    echo 'Command is required' . PHP_EOL;
+    echo 'Available commands: list-users, create-users, delete-user {id}' . PHP_EOL;
+    exit(1);
+}
+
+switch ($command) {
+    case 'list-users':
+        $users = $service->listUsers();
+
+        if ($users === []) {
+            echo 'Users list is empty' . PHP_EOL;
+            exit(0);
+        }
+        foreach ($users as $user) {
+            echo $user->getId() . ' ';
+            echo $user->getFirstName() . ' ';
+            echo $user->getLastName() . ' ';
+            echo $user->getEmail() . PHP_EOL;
+        }
+        break;
+
+    case 'create-user':
+        $user = $service->createUser();
+
+        echo 'User created: ' . PHP_EOL;
+        echo $user->getId() . ' ';
+        echo $user->getFirstName() . ' ';
+        echo $user->getLastName() . ' ';
+        echo $user->getEmail() . PHP_EOL;
+
+        break;
+
+    case 'delete-user':
+        $id = $argv[2] ?? null;
+
+        if ($id === null) {
+            echo 'User id is required' . PHP_EOL;
+            exit(1);
+        }
+
+        $service->deleteUser((int) $id);
+
+        echo 'User deleted' . PHP_EOL;
+
+        break;
+
+    default:
+        echo 'Unknown command: ' . $command . PHP_EOL;
+        echo 'Available commands: list-users, create-users, delete-user {id}' . PHP_EOL;
+        exit(1);
+}
