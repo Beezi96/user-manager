@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Domain\User;
+use App\Factory\UserFactory;
 use App\Repository\UserRepositoryInterface;
 
 final class UserService
 {
     public function __construct(
-        private UserRepositoryInterface $repository
+        private UserRepositoryInterface $repository,
+        private UserFactory $userFactory
     ) {}
 
     public function listUsers(): array
@@ -24,12 +26,7 @@ final class UserService
 
         $nextId = $this->getNextId($users);
 
-        $user = new User(
-            id: $nextId,
-            firstName: 'John',
-            lastName: 'Doe',
-            email: 'john' . $nextId . '@example.com',
-        );
+        $user = $this->userFactory->create($nextId);
 
         $this->repository->save($user);
 

@@ -5,6 +5,7 @@ namespace App\Repository;
 
 use App\Domain\User;
 use http\Exception\RuntimeException;
+use App\Exception\UserNotFoundException;
 
 final class JsonUserRepository implements UserRepositoryInterface
 {
@@ -47,9 +48,15 @@ final class JsonUserRepository implements UserRepositoryInterface
     {
         $data = $this->readData();
 
+        $initialCount = count($data);
+
         $data = array_filter($data,
             fn (array $item): bool => (int) $item['id'] !== $id
         );
+
+        if (count($data) === $initialCount) {
+            throw new UserNotFoundException('User with id ' . $id . ' not found');
+        }
 
         $this->writeData(array_values($data));
 

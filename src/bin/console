@@ -6,11 +6,14 @@ declare(strict_types=1);
 require __DIR__ . '/../vendor/autoload.php';
 
 use App\Domain\User;
+use App\Factory\UserFactory;
 use App\Repository\JsonUserRepository;
 use App\Service\UserService;
+use App\Exception\UserNotFoundException;
 
 $repository = new JsonUserRepository(__DIR__ . '/../storage/users.json');
-$service = new UserService($repository);
+$userFactory = new UserFactory();
+$service = new UserService($repository, $userFactory);
 
 $command = $argv[1] ?? null;
 
@@ -55,9 +58,13 @@ switch ($command) {
             exit(1);
         }
 
-        $service->deleteUser((int) $id);
-
-        echo 'User deleted' . PHP_EOL;
+        try {
+            $service->deleteUser((int) $id);
+            echo 'User deleted' . PHP_EOL;
+        } catch (UserNotFoundException $e) {
+            echo $e->getMessage() . PHP_EOL;
+            exit(1);
+        }
 
         break;
 
