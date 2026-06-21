@@ -5,71 +5,15 @@ declare(strict_types=1);
 
 require __DIR__ . '/../vendor/autoload.php';
 
-use App\Domain\User;
+use App\Console\Application;
 use App\Factory\UserFactory;
 use App\Repository\JsonUserRepository;
 use App\Service\UserService;
-use App\Exception\UserNotFoundException;
 
 $repository = new JsonUserRepository(__DIR__ . '/../storage/users.json');
 $userFactory = new UserFactory();
-$service = new UserService($repository, $userFactory);
+$userService = new UserService($repository, $userFactory);
 
-$command = $argv[1] ?? null;
+$app = new Application($userService);
 
-if ($command === null) {
-    echo 'Command is required' . PHP_EOL;
-    echo 'Available commands: list-users, create-users, delete-user {id}' . PHP_EOL;
-    exit(1);
-}
-
-switch ($command) {
-    case 'list-users':
-        $users = $service->listUsers();
-
-        if ($users === []) {
-            echo 'Users list is empty' . PHP_EOL;
-            exit(0);
-        }
-        foreach ($users as $user) {
-            echo $user->getId() . ' ';
-            echo $user->getFirstName() . ' ';
-            echo $user->getLastName() . ' ';
-            echo $user->getEmail() . PHP_EOL;
-        }
-        break;
-
-    case 'create-user':
-        $user = $service->createUser();
-
-        echo 'User created: ' . PHP_EOL;
-        echo $user->getId() . ' ';
-        echo $user->getFirstName() . ' ';
-        echo $user->getLastName() . ' ';
-        echo $user->getEmail() . PHP_EOL;
-
-        break;
-
-    case 'delete-user':
-        $id = $argv[2] ?? null;
-
-        if ($id === null) {
-            echo 'User id is required' . PHP_EOL;
-            exit(1);
-        }
-
-        try {
-            $service->deleteUser((int) $id);
-            echo 'User deleted' . PHP_EOL;
-        } catch (UserNotFoundException $e) {
-            echo $e->getMessage() . PHP_EOL;
-            exit(1);
-        }
-
-        break;
-
-    default:
-        echo 'Unknown command: ' . $command . PHP_EOL;
-        echo 'Available commands: list-users, create-users, delete-user {id}' . PHP_EOL;
-        exit(1);
-}
+exit($app->run($argv));
